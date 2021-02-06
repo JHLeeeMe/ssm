@@ -2,9 +2,12 @@
 """
 
 import time
+import struct
 import socket
 import pickle
 import threading
+
+import cv2
 
 
 class ScreenMirrorServer:
@@ -12,27 +15,62 @@ class ScreenMirrorServer:
         self._HOST = host
         self._PORT = port
 
+        if conn_limits < 1:
+            self._conn_limits = 1
+        else:
+            self._conn_limits = conn_limits
+
         self._lock = threading.Lock()
-        self._conn_limits = conn_limits
 
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind((self._HOST, self._PORT))
 
     def _recieve(self, conn_socket: socket.socket, addr: (str, int)):
-        while True:
-            try:
-                b_data = conn_socket.recv(1024)
-                if b_data == b'':
+        assert (conn_socket is not None)
+        overhead_size = struct.calcsize('>I')
+        b_payload = b''
+
+        flag = True
+        while flag:
+            while len(b_payload) < overhead_size:
+                b_received_data = conn_socket.recv(overhead_size)
+                if b_received_data == b'':
+                    conn_socket.close()
+                    with self._lock:
+                        self._conn_limits += 1
+                    flag = False
                     break
-                data = pickle.loads(b_data)
-                print(f'{addr}: {data}')
-            except Exception as e:
-                print(e)
+                b_payload += b_received_data
+
+            if not flag:
                 break
 
-        with self._lock:
-            self._conn_limits += 1
-        print('thread end')
+            b_overhead = b_payload[:overhead_size]
+            b_payload += b_payload[overhead_size:]
+
+            msg_size, _ = struct.unpack('>I', b_overhead)
+
+            while len(b_payload) < msg_size:
+                b_received_data = conn_socket.recv(4096)
+                if b_received_data == b'':
+                    conn_socket.close()
+                    with self._lock:
+                        self._conn_limits += 1
+                    flag = False
+                    break
+                b_payload += b_received_data
+
+            if not flag:
+                break
+
+            b_data = b_payload[:msg_size]
+            b_payload = b_payload[msg_size:]
+
+            encoded_data = pickle.loads(b_data)
+            img_data = cv2.imdecode(encoded_data, flags=cv2.IMREAD_COLOR)
+            cv2.imshow(f'{addr}', img_data)
+
+        print('Thread ends...')
 
     def start(self):
         self._server_socket.listen()
@@ -46,5 +84,5 @@ class ScreenMirrorServer:
             with self._lock:
                 self._conn_limits -= 1
 
-            t = threading.Thread(name=f'{addr[1]}', target=self._recieve, args=(conn_socket, addr))
+            t = threading.Thread(name=f'{addr[0]}', target=self._recieve, args=(conn_socket, addr))
             t.start()
