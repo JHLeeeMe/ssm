@@ -7,6 +7,7 @@ from ssm import client
 
 
 client = client.ScreenMirrorClient('localhost')
+#client = client.ScreenMirrorClient('msi-private')
 
 t = threading.Thread(target=client.start)
 t.start()

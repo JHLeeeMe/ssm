@@ -68,7 +68,7 @@ class ScreenMirrorServer:
             b_payload = b_payload[payload_size:]
 
             encoded_data = pickle.loads(b_img_data)
-            img_data = cv2.imdecode(encoded_data, flags=cv2.IMREAD_COLOR)
+            img_data = cv2.imdecode(encoded_data, cv2.IMREAD_COLOR)
             cv2.imshow(f'{addr}', img_data)
 
         cv2.destroyWindow(winname=f'{addr}')

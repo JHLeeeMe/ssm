@@ -34,7 +34,6 @@ class ScreenMirrorClient:
                 encoded_data = self._encode(data)
                 b_encoded_data = pickle.dumps(encoded_data)
                 b_encoded_data_size = len(b_encoded_data)
-                print(struct.calcsize('>I'))
 
                 self._client_socket.sendall(
                     struct.pack('>I', b_encoded_data_size) + b_encoded_data
