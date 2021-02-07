@@ -27,7 +27,8 @@ class ScreenMirrorServer:
 
     def _recieve(self, conn_socket: socket.socket, addr: (str, int)):
         assert (conn_socket is not None)
-        overhead_size = struct.calcsize('>I')
+
+        overhead_size = struct.calcsize('>L')
         b_payload = b''
 
         flag = True
@@ -46,9 +47,9 @@ class ScreenMirrorServer:
                 break
 
             b_overhead = b_payload[:overhead_size]
-            b_payload += b_payload[overhead_size:]
+            b_payload = b_payload[overhead_size:]
 
-            msg_size, _ = struct.unpack('>I', b_overhead)
+            msg_size = struct.unpack('>L', b_overhead)[0]
 
             while len(b_payload) < msg_size:
                 b_received_data = conn_socket.recv(4096)
@@ -63,14 +64,15 @@ class ScreenMirrorServer:
             if not flag:
                 break
 
-            b_data = b_payload[:msg_size]
+            b_img_data = b_payload[:msg_size]
             b_payload = b_payload[msg_size:]
 
-            encoded_data = pickle.loads(b_data)
+            encoded_data = pickle.loads(b_img_data)
             img_data = cv2.imdecode(encoded_data, flags=cv2.IMREAD_COLOR)
             cv2.imshow(f'{addr}', img_data)
 
-        print('Thread ends...')
+        cv2.destroyWindow(winname=f'{addr}')
+        print('Mirroring ends...')
 
     def start(self):
         self._server_socket.listen()

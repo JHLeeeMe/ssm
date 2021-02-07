@@ -2,7 +2,6 @@
 """
 
 import os
-import time
 import struct
 import pickle
 import socket
@@ -15,7 +14,7 @@ from Xlib.display import Display
 
 
 class ScreenMirrorClient:
-    def __init__(self, host: str, port: int = 7890, quality: int = 80, cursor: bool = True):
+    def __init__(self, host: str, port: int = 7890, quality: int = 80, cursor: bool = False):
         self._host = host
         self._port = port
         self._quality = quality
@@ -37,7 +36,7 @@ class ScreenMirrorClient:
                 b_encoded_data_size = len(b_encoded_data)
 
                 self._client_socket.sendall(
-                    struct.pack('>I', b_encoded_data_size) + b_encoded_data
+                    struct.pack('>L', b_encoded_data_size) + b_encoded_data
                 )
             except Exception as e:
                 print(e)
@@ -56,7 +55,7 @@ class ScreenMirrorClient:
         coordinates = display.screen().root.query_pointer()._data
         return coordinates['root_x'], coordinates['root_y']
 
-    def _encode(self, data):
+    def _encode(self, data) -> np.ndarray:
         encode_param = (cv2.IMWRITE_JPEG_QUALITY, self._quality)
-        encoded_data = cv2.imencode('.jpg', data, params=encode_param)
+        _, encoded_data = cv2.imencode('.jpg', data, params=encode_param)
         return encoded_data
