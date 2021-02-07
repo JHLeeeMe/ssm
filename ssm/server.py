@@ -46,12 +46,12 @@ class ScreenMirrorServer:
             if not flag:
                 break
 
-            b_overhead = b_payload[:overhead_size]
             b_payload = b_payload[overhead_size:]
+            b_payload_size = b_payload[:overhead_size]
 
-            msg_size = struct.unpack('>L', b_overhead)[0]
+            payload_size = struct.unpack('>L', b_payload_size)[0]
 
-            while len(b_payload) < msg_size:
+            while len(b_payload) < payload_size:
                 b_received_data = conn_socket.recv(4096)
                 if b_received_data == b'':
                     conn_socket.close()
@@ -64,8 +64,8 @@ class ScreenMirrorServer:
             if not flag:
                 break
 
-            b_img_data = b_payload[:msg_size]
-            b_payload = b_payload[msg_size:]
+            b_img_data = b_payload[:payload_size]
+            b_payload = b_payload[payload_size:]
 
             encoded_data = pickle.loads(b_img_data)
             img_data = cv2.imdecode(encoded_data, flags=cv2.IMREAD_COLOR)
