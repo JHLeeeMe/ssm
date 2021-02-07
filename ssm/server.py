@@ -46,8 +46,8 @@ class ScreenMirrorServer:
             if not flag:
                 break
 
-            b_payload = b_payload[overhead_size:]
             b_payload_size = b_payload[:overhead_size]
+            b_payload = b_payload[overhead_size:]
 
             payload_size = struct.unpack('>I', b_payload_size)[0]
 

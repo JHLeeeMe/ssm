@@ -34,6 +34,7 @@ class ScreenMirrorClient:
                 encoded_data = self._encode(data)
                 b_encoded_data = pickle.dumps(encoded_data)
                 b_encoded_data_size = len(b_encoded_data)
+                print(struct.calcsize('>I'))
 
                 self._client_socket.sendall(
                     struct.pack('>I', b_encoded_data_size) + b_encoded_data
@@ -47,7 +48,7 @@ class ScreenMirrorClient:
         if self._cursor:
             screen = cv2.circle(screen, self._mouse_position(), 5, (0, 0, 255), -1)
 
-        cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        screen = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
         return screen
 
     def _mouse_position(self) -> (int, int):
