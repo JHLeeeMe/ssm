@@ -36,7 +36,7 @@ class ScreenMirrorClient:
                 b_encoded_data_size = len(b_encoded_data)
 
                 self._client_socket.sendall(
-                    struct.pack('>L', b_encoded_data_size) + b_encoded_data
+                    struct.pack('>I', b_encoded_data_size) + b_encoded_data
                 )
             except Exception as e:
                 print(e)

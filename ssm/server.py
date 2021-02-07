@@ -28,7 +28,7 @@ class ScreenMirrorServer:
     def _recieve(self, conn_socket: socket.socket, addr: (str, int)):
         assert (conn_socket is not None)
 
-        overhead_size = struct.calcsize('>L')
+        overhead_size = struct.calcsize('>I')
         b_payload = b''
 
         flag = True
@@ -49,7 +49,7 @@ class ScreenMirrorServer:
             b_payload = b_payload[overhead_size:]
             b_payload_size = b_payload[:overhead_size]
 
-            payload_size = struct.unpack('>L', b_payload_size)[0]
+            payload_size = struct.unpack('>I', b_payload_size)[0]
 
             while len(b_payload) < payload_size:
                 b_received_data = conn_socket.recv(4096)
