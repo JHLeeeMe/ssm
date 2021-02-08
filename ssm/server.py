@@ -25,51 +25,57 @@ class ScreenMirrorServer:
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind((self._HOST, self._PORT))
 
-    def _recieve(self, conn_socket: socket.socket, addr: (str, int)):
+    def _receive(self, conn_socket: socket.socket, addr: (str, int)):
         assert (conn_socket is not None)
 
         overhead_size = struct.calcsize('>I')
-        b_payload = b''
+        payload_bin = b''
 
         flag = True
         while flag:
-            while len(b_payload) < overhead_size:
-                b_received_data = conn_socket.recv(overhead_size)
-                if b_received_data == b'':
+            while len(payload_bin) < overhead_size:
+                received_data_bin = conn_socket.recv(overhead_size)
+                if received_data_bin == b'':
                     conn_socket.close()
                     with self._lock:
                         self._conn_limits += 1
                     flag = False
                     break
-                b_payload += b_received_data
+                payload_bin += received_data_bin
 
             if not flag:
                 break
 
-            b_payload_size = b_payload[:overhead_size]
-            b_payload = b_payload[overhead_size:]
+            packed_payload_size = payload_bin[:overhead_size]
+            payload_bin = payload_bin[overhead_size:]
 
-            payload_size = struct.unpack('>I', b_payload_size)[0]
+            payload_size = struct.unpack('>I', packed_payload_size)[0]
 
-            while len(b_payload) < payload_size:
-                b_received_data = conn_socket.recv(4096)
-                if b_received_data == b'':
+            while len(payload_bin) < payload_size:
+                received_data_bin = conn_socket.recv(4096)
+                if received_data_bin == b'':
                     conn_socket.close()
                     with self._lock:
                         self._conn_limits += 1
                     flag = False
                     break
-                b_payload += b_received_data
+                payload_bin += received_data_bin
 
             if not flag:
                 break
 
-            b_img_data = b_payload[:payload_size]
-            b_payload = b_payload[payload_size:]
+            encoded_screen_pkl = payload_bin[:payload_size]
+            payload_bin = payload_bin[payload_size:]
 
-            encoded_data = pickle.loads(b_img_data)
-            img_data = cv2.imdecode(encoded_data, cv2.IMREAD_COLOR)
-            cv2.imshow(f'{addr}', img_data)
+            encoded_screen = pickle.loads(encoded_screen_pkl)
+            screen = cv2.imdecode(encoded_screen, flags=cv2.IMREAD_COLOR)
+
+            cv2.imshow(f'{addr}', screen)
+            if cv2.waitKey(1) == 27:
+                conn_socket.close()
+                with self._lock:
+                    self._conn_limits += 1
+                break
 
         cv2.destroyWindow(winname=f'{addr}')
         print('Mirroring ends...')
@@ -86,5 +92,5 @@ class ScreenMirrorServer:
             with self._lock:
                 self._conn_limits -= 1
 
-            t = threading.Thread(name=f'{addr[0]}', target=self._recieve, args=(conn_socket, addr))
+            t = threading.Thread(name=f'{addr[0]}', target=self._receive, args=(conn_socket, addr))
             t.start()

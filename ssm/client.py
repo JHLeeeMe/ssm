@@ -30,13 +30,13 @@ class ScreenMirrorClient:
         self._client_socket.connect((self._host, self._port))
         while True:
             try:
-                data = self._get_screen()
-                encoded_data = self._encode(data)
-                b_encoded_data = pickle.dumps(encoded_data)
-                b_encoded_data_size = len(b_encoded_data)
+                screen = self._get_screen()
+                encoded_screen = self._encode(screen)
+                encoded_screen_pkl = pickle.dumps(encoded_screen)
+                encoded_screen_pkl_size = len(encoded_screen_pkl)
 
                 self._client_socket.sendall(
-                    struct.pack('>I', b_encoded_data_size) + b_encoded_data
+                    struct.pack('>I', encoded_screen_pkl_size) + encoded_screen_pkl
                 )
             except Exception as e:
                 print(e)
@@ -51,11 +51,11 @@ class ScreenMirrorClient:
         return screen
 
     def _mouse_position(self) -> (int, int):
-        display = Display(os.environ['DISPLAY'])
+        display = Display(display=os.environ['DISPLAY'])
         coordinates = display.screen().root.query_pointer()._data
         return coordinates['root_x'], coordinates['root_y']
 
     def _encode(self, data) -> np.ndarray:
         encode_param = (cv2.IMWRITE_JPEG_QUALITY, self._quality)
-        _, encoded_data = cv2.imencode('.jpg', data, params=encode_param)
+        _, encoded_data = cv2.imencode(ext='.jpg', img=data, params=encode_param)
         return encoded_data
