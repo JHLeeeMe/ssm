@@ -20,7 +20,7 @@ class ScreenMirrorServer:
         else:
             self._conn_limits = conn_limits
 
-        self._lock = threading.Lock()
+        self._LOCK = threading.Lock()
 
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind((self._HOST, self._PORT))
@@ -61,7 +61,7 @@ class ScreenMirrorServer:
                     raise StopIteration
         except StopIteration:
             conn_socket.close()
-            with self._lock:
+            with self._LOCK:
                 self._conn_limits += 1
             cv2.destroyWindow(winname=f'{addr}')
             print('Mirroring ends...')
@@ -69,13 +69,13 @@ class ScreenMirrorServer:
     def start(self):
         self._server_socket.listen()
         while True:
-            with self._lock:
+            with self._LOCK:
                 if self._conn_limits <= 0:
                     time.sleep(1)
                     continue
 
             conn_socket, addr = self._server_socket.accept()
-            with self._lock:
+            with self._LOCK:
                 self._conn_limits -= 1
 
             t = threading.Thread(name=f'{addr[0]}', target=self._receive, args=(conn_socket, addr))
