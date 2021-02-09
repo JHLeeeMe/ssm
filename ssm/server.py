@@ -31,54 +31,40 @@ class ScreenMirrorServer:
         overhead_size = struct.calcsize('>I')
         payload_bin = b''
 
-        flag = True
-        while flag:
-            while len(payload_bin) < overhead_size:
-                received_data_bin = conn_socket.recv(overhead_size)
-                if received_data_bin == b'':
-                    conn_socket.close()
-                    with self._lock:
-                        self._conn_limits += 1
-                    flag = False
-                    break
-                payload_bin += received_data_bin
+        try:
+            while True:
+                while len(payload_bin) < overhead_size:
+                    received_data_bin = conn_socket.recv(overhead_size)
+                    if received_data_bin == b'':
+                        raise StopIteration
+                    payload_bin += received_data_bin
 
-            if not flag:
-                break
+                packed_payload_size = payload_bin[:overhead_size]
+                payload_bin = payload_bin[overhead_size:]
 
-            packed_payload_size = payload_bin[:overhead_size]
-            payload_bin = payload_bin[overhead_size:]
+                payload_size = struct.unpack('>I', packed_payload_size)[0]
 
-            payload_size = struct.unpack('>I', packed_payload_size)[0]
+                while len(payload_bin) < payload_size:
+                    received_data_bin = conn_socket.recv(4096)
+                    if received_data_bin == b'':
+                        raise StopIteration
+                    payload_bin += received_data_bin
 
-            while len(payload_bin) < payload_size:
-                received_data_bin = conn_socket.recv(4096)
-                if received_data_bin == b'':
-                    conn_socket.close()
-                    with self._lock:
-                        self._conn_limits += 1
-                    flag = False
-                    break
-                payload_bin += received_data_bin
+                encoded_screen_pkl = payload_bin[:payload_size]
+                payload_bin = payload_bin[payload_size:]
 
-            if not flag:
-                break
+                encoded_screen = pickle.loads(encoded_screen_pkl)
+                screen = cv2.imdecode(encoded_screen, flags=cv2.IMREAD_COLOR)
 
-            encoded_screen_pkl = payload_bin[:payload_size]
-            payload_bin = payload_bin[payload_size:]
-
-            encoded_screen = pickle.loads(encoded_screen_pkl)
-            screen = cv2.imdecode(encoded_screen, flags=cv2.IMREAD_COLOR)
-
-            cv2.imshow(f'{addr}', screen)
-            if cv2.waitKey(1) == 27:
-                conn_socket.close()
-                with self._lock:
-                    self._conn_limits += 1
-                break
-
-        cv2.destroyWindow(winname=f'{addr}')
-        print('Mirroring ends...')
+                cv2.imshow(f'{addr}', screen)
+                if cv2.waitKey(1) == 27:
+                    raise StopIteration
+        except StopIteration:
+            conn_socket.close()
+            with self._lock:
+                self._conn_limits += 1
+            cv2.destroyWindow(winname=f'{addr}')
+            print('Mirroring ends...')
 
     def start(self):
         self._server_socket.listen()
