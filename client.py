@@ -6,8 +6,8 @@ import threading
 from ssm import client
 
 
-client = client.ScreenMirrorClient('msi-private', cursor=True)
-#client = client.ScreenMirrorClient('localhost')
+#client = client.ScreenMirrorClient('msi-private', cursor=True)
+client = client.ScreenMirrorClient('localhost')
 
 t = threading.Thread(target=client.start)
 t.start()
