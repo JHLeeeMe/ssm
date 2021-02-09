@@ -15,10 +15,12 @@ from Xlib.display import Display
 
 class ScreenMirrorClient:
     def __init__(self, host: str, port: int = 7890, quality: int = 80, cursor: bool = False):
-        self._host = host
-        self._port = port
-        self._quality = quality
-        self._cursor = cursor
+        self._HOST = host
+        self._PORT = port
+
+        self._QUALITY = quality
+        self._CURSOR = cursor
+
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start(self):
@@ -27,7 +29,7 @@ class ScreenMirrorClient:
         t.join()
 
     def _send(self):
-        self._client_socket.connect((self._host, self._port))
+        self._client_socket.connect((self._HOST, self._PORT))
         while True:
             try:
                 screen = self._get_screen()
@@ -44,7 +46,7 @@ class ScreenMirrorClient:
 
     def _get_screen(self) -> np.ndarray:
         screen = np.array(ImageGrab.grab())
-        if self._cursor:
+        if self._CURSOR:
             screen = cv2.circle(screen, self._mouse_position(), 5, (0, 0, 255), -1)
 
         screen = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
@@ -56,6 +58,6 @@ class ScreenMirrorClient:
         return coordinates['root_x'], coordinates['root_y']
 
     def _encode(self, data) -> np.ndarray:
-        encode_param = (cv2.IMWRITE_JPEG_QUALITY, self._quality)
+        encode_param = (cv2.IMWRITE_JPEG_QUALITY, self._QUALITY)
         _, encoded_data = cv2.imencode(ext='.jpg', img=data, params=encode_param)
         return encoded_data
