@@ -11,19 +11,19 @@ import cv2
 
 
 class ScreenMirrorServer:
-    def __init__(self, host: str, port: int = 7890, conn_limits: int = 5):
+    def __init__(self, host: str = '', port: int = 7890):
         self._HOST = host
         self._PORT = port
 
-        if conn_limits < 1:
-            self._conn_limits = 1
-        else:
-            self._conn_limits = conn_limits
-
-        self._LOCK = threading.Lock()
-
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind((self._HOST, self._PORT))
+
+    def start(self):
+        self._server_socket.listen()
+        conn_socket, addr = self._server_socket.accept()
+
+        t = threading.Thread(target=self._receive, args=(conn_socket, addr))
+        t.start()
 
     def _receive(self, conn_socket: socket.socket, addr: (str, int)):
         assert (conn_socket is not None)
@@ -35,7 +35,7 @@ class ScreenMirrorServer:
             while True:
                 while len(payload_bin) < overhead_size:
                     received_data_bin = conn_socket.recv(overhead_size)
-                    if received_data_bin == b'':
+                    if not received_data_bin:
                         raise StopIteration
                     payload_bin += received_data_bin
 
@@ -46,7 +46,7 @@ class ScreenMirrorServer:
 
                 while len(payload_bin) < payload_size:
                     received_data_bin = conn_socket.recv(4096)
-                    if received_data_bin == b'':
+                    if not received_data_bin:
                         raise StopIteration
                     payload_bin += received_data_bin
 
@@ -56,27 +56,11 @@ class ScreenMirrorServer:
                 encoded_screen = pickle.loads(encoded_screen_pkl)
                 screen = cv2.imdecode(encoded_screen, flags=cv2.IMREAD_COLOR)
 
-                cv2.imshow(f'{addr}', screen)
+                cv2.imshow(winname=f'{addr}', mat=screen)
                 if cv2.waitKey(1) == 27:
                     raise StopIteration
         except StopIteration:
             conn_socket.close()
-            with self._LOCK:
-                self._conn_limits += 1
             cv2.destroyWindow(winname=f'{addr}')
             print('Mirroring ends...')
 
-    def start(self):
-        self._server_socket.listen()
-        while True:
-            with self._LOCK:
-                if self._conn_limits <= 0:
-                    time.sleep(1)
-                    continue
-
-            conn_socket, addr = self._server_socket.accept()
-            with self._LOCK:
-                self._conn_limits -= 1
-
-            t = threading.Thread(name=f'{addr[0]}', target=self._receive, args=(conn_socket, addr))
-            t.start()
