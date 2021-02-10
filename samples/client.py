@@ -1,4 +1,4 @@
-""" TEST CLIENT """
+""" Sample Client """
 
 import sys
 import threading
@@ -17,3 +17,4 @@ while True:
         break
 
 sys.exit()
+

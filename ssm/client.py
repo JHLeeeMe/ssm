@@ -20,6 +20,7 @@ class ScreenMirrorClient:
 
         self._QUALITY = quality
         self._CURSOR = cursor
+        self._WIDTH, self._HEIGHT = self._screen_size()
 
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -30,19 +31,22 @@ class ScreenMirrorClient:
 
     def _send(self):
         self._client_socket.connect((self._HOST, self._PORT))
-        while True:
-            try:
+        try:
+            while True:
                 screen = self._get_screen()
                 encoded_screen = self._encode(screen)
                 encoded_screen_pkl = pickle.dumps(encoded_screen)
                 encoded_screen_pkl_size = len(encoded_screen_pkl)
 
                 self._client_socket.sendall(
-                    struct.pack('>I', encoded_screen_pkl_size) + encoded_screen_pkl
+                    struct.pack('>III',
+                                self._WIDTH,
+                                self._HEIGHT,
+                                encoded_screen_pkl_size) + encoded_screen_pkl
                 )
-            except Exception as e:
-                print(e)
-                break
+        except Exception as e:
+            print(e)
+            print('Mirroring ends...')
 
     def _get_screen(self) -> np.ndarray:
         screen = np.array(ImageGrab.grab())
@@ -51,6 +55,11 @@ class ScreenMirrorClient:
 
         screen = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
         return screen
+
+    def _screen_size(self) -> (int, int):
+        display = Display(display=os.environ['DISPLAY'])
+        width, height = display.screen().width_in_pixels, display.screen().height_in_pixels
+        return width, height
 
     def _mouse_position(self) -> (int, int):
         display = Display(display=os.environ['DISPLAY'])
