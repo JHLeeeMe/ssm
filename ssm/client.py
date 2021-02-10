@@ -42,6 +42,7 @@ class ScreenMirrorClient:
                 )
             except Exception as e:
                 print(e)
+                print('Mirroring ends...')
                 break
 
     def _get_screen(self) -> np.ndarray:
