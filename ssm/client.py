@@ -5,7 +5,6 @@ import os
 import struct
 import pickle
 import socket
-import threading
 
 import cv2
 import numpy as np
@@ -25,12 +24,11 @@ class ScreenMirrorClient:
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start(self):
-        t = threading.Thread(target=self._send)
-        t.start()
-        t.join()
+        self._client_socket.connect((self._HOST, self._PORT))
+
+        self._send()
 
     def _send(self):
-        self._client_socket.connect((self._HOST, self._PORT))
         try:
             while True:
                 screen = self._get_screen()
