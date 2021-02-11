@@ -3,9 +3,8 @@
 
 import os
 import struct
-import socket
 import pickle
-import threading
+import socket
 
 import cv2
 from Xlib.display import Display
@@ -25,8 +24,7 @@ class ScreenMirrorServer:
         self._server_socket.listen()
         conn_socket, addr = self._server_socket.accept()
 
-        t = threading.Thread(target=self._receive, args=(conn_socket, addr))
-        t.start()
+        self._receive(conn_socket, addr)
 
     def _receive(self, conn_socket: socket.socket, addr: (str, int)):
         assert (conn_socket is not None)
@@ -37,7 +35,7 @@ class ScreenMirrorServer:
         try:
             while True:
                 while len(payload_bin) < overhead_size:
-                    received_data_bin = conn_socket.recv(overhead_size)
+                    received_data_bin = conn_socket.recv(8192)
                     if not received_data_bin:
                         raise StopIteration
                     payload_bin += received_data_bin
@@ -48,7 +46,7 @@ class ScreenMirrorServer:
                 width, height, payload_size = struct.unpack('>III', packed_payload_size)
 
                 while len(payload_bin) < payload_size:
-                    received_data_bin = conn_socket.recv(4096)
+                    received_data_bin = conn_socket.recv(8192)
                     if not received_data_bin:
                         raise StopIteration
                     payload_bin += received_data_bin
