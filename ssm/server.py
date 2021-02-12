@@ -10,12 +10,18 @@ import cv2
 from Xlib.display import Display
 
 
+def _screen_size() -> (int, int):
+    display = Display(display=os.environ['DISPLAY'])
+    width, height = display.screen().width_in_pixels, display.screen().height_in_pixels
+    return width, height
+
+
 class ScreenMirrorServer:
     def __init__(self, host: str = '', port: int = 7890):
         self._HOST = host
         self._PORT = port
 
-        self._WIDTH, self._HEIGHT = self._screen_size()
+        self._WIDTH, self._HEIGHT = _screen_size()
 
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind((self._HOST, self._PORT))
@@ -67,8 +73,3 @@ class ScreenMirrorServer:
             conn_socket.close()
             cv2.destroyWindow(winname=f'{addr}')
             print('Mirroring ends...')
-
-    def _screen_size(self) -> (int, int):
-        display = Display(display=os.environ['DISPLAY'])
-        width, height = display.screen().width_in_pixels, display.screen().height_in_pixels
-        return width, height
