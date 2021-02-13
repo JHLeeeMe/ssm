@@ -1,6 +1,5 @@
 """ Sample Client """
 
-import sys
 import threading
 
 from ssm import ScreenMirrorClient
