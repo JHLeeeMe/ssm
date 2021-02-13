@@ -118,10 +118,10 @@ class ScreenMirrorServer:
                                         (self._WIDTH, self._HEIGHT),
                                         interpolation=cv2.INTER_AREA)
 
-                cv2.imshow(winname=f'{addr}', mat=screen)
+                cv2.imshow(winname=str(addr), mat=screen)
                 if cv2.waitKey(1) == 27:
                     raise StopIteration
         except StopIteration:
             conn_socket.close()
-            cv2.destroyWindow(winname=f'{addr}')
+            cv2.destroyWindow(winname=str(addr))
             print('Mirroring ends...')

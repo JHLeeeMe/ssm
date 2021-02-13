@@ -130,7 +130,7 @@ class ScreenMirrorClient:
         screen = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
         return screen
 
-    def _encode(self, data) -> np.ndarray:
+    def _encode(self, data: np.ndarray) -> np.ndarray:
         """Encode screen data
 
         encode screen to jpg
