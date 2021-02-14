@@ -1,7 +1,7 @@
 # ssm
 Simple Screen Mirror 💻✨✨✨🖥️  
 ![screen-mirroring-icon](https://user-images.githubusercontent.com/31606119/107869470-d246af00-6ed1-11eb-8f95-acf910f27dc4.png)
-![ssm](https://user-images.githubusercontent.com/31606119/107875636-75182100-6f04-11eb-9da0-2938fdc2cd72.gif)
+![ssm](https://user-images.githubusercontent.com/31606119/107876125-63844880-6f07-11eb-9949-cd1b36e5207e.gif)
 
 ## How to run
 ### 1. Install ssm package
