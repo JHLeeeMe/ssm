@@ -21,8 +21,6 @@ server:
 
 
 client:
-    import threading
-
     from ssm import ScreenMirrorClient
 
 
