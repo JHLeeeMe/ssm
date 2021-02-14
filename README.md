@@ -1,6 +1,6 @@
 # ssm
 Simple Screen Mirror 💻✨✨✨🖥️  
-![screen_mirroring_icon](https://user-images.githubusercontent.com/31606119/107869470-d246af00-6ed1-11eb-8f95-acf910f27dc4.png)
+![screen-mirroring-icon](https://user-images.githubusercontent.com/31606119/107869470-d246af00-6ed1-11eb-8f95-acf910f27dc4.png)
 
 ## How to run
 ### 1. Install ssm package
@@ -10,17 +10,14 @@ Simple Screen Mirror 💻✨✨✨🖥️
 - sample codes [here](https://github.com/JHLeeeMe/ssm/tree/master/samples)
 ```python
 server:
-    import threading
-
     from ssm import ScreenMirrorServer
 
 
     # ssm_server = ScreenMirrorServer(['<client-ip>', port=7890])
     ssm_server = ScreenMirrorServer()  # default: all ip & 7890 port
 
-    t = threading.Thread(target=ssm_server.start)
-    t.start()
-    t.join()
+    ssm_server.start()
+
 
 
 client:
@@ -31,8 +28,8 @@ client:
 
     ssm_client = ScreenMirrorClient('<server-ip>'[, port=7890, quality=90, cursor=True])
 
-    t = threading.Thread(target=ssm_client.start)
-    t.start()
+    ssm_client.start()
+
 ```
 
 ### 3. Run
