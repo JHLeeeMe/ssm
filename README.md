@@ -1,12 +1,13 @@
 # ssm
 Simple Screen Mirror 💻✨✨✨🖥️  
 ![screen-mirroring-icon](https://user-images.githubusercontent.com/31606119/107869470-d246af00-6ed1-11eb-8f95-acf910f27dc4.png)
+![ssm](https://user-images.githubusercontent.com/31606119/107876125-63844880-6f07-11eb-9949-cd1b36e5207e.gif)
 
 ## How to run
 ### 1. Install ssm package
 - ```pip install ssm-python```
 
-### 2. Create server.py  
+### 2. Create server.py & client.py
 - sample codes [here](https://github.com/JHLeeeMe/ssm/tree/master/samples)
 ```python
 server:
