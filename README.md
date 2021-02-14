@@ -21,16 +21,17 @@ server:
     t.start()
     t.join()
 
+
 client:
-	import threading
+    import threading
 
-	from ssm import ScreenMirrorClient
+    from ssm import ScreenMirrorClient
 
 
-	ssm_client = ScreenMirrorClient('<server-ip>'[, port=7890, quality=90, cursor=True])
+    ssm_client = ScreenMirrorClient('<server-ip>'[, port=7890, quality=90, cursor=True])
 
-	t = threading.Thread(target=ssm_client.start)
-	t.start()
+    t = threading.Thread(target=ssm_client.start)
+    t.start()
 ```
 
 ### 3. Run
