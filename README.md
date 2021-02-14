@@ -6,7 +6,7 @@ Simple Screen Mirror 💻✨✨✨🖥️
 ### 1. Install ssm package
 - ```pip install ssm-python```
 
-### 2. Create server.py  
+### 2. Create server.py & client.py
 - sample codes [here](https://github.com/JHLeeeMe/ssm/tree/master/samples)
 ```python
 server:
