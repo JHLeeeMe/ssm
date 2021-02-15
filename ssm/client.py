@@ -9,6 +9,7 @@ Functions:
 
 Classes:
     ScreenMirrorClient
+
 """
 
 import os
@@ -29,6 +30,7 @@ def _screen_size() -> (int, int):
 
     Returns:
         width, height: (int, int)
+
     """
     display = Display(display=os.environ['DISPLAY'])
     width, height = \
@@ -43,6 +45,7 @@ def _mouse_position() -> (int, int):
 
     Returns:
         coordinates: (int, int)
+
     """
     display = Display(display=os.environ['DISPLAY'])
     coordinates = display.screen().root.query_pointer()._data
@@ -75,6 +78,7 @@ class ScreenMirrorClient:
         _send() -> None
         _get_screen() -> np.ndarray
         _encode(data: np.ndarray) -> np.ndarray
+
     """
     def __init__(self, host: str, port: int = 7890,
                  quality: int = 80, cursor: bool = False):
@@ -97,6 +101,7 @@ class ScreenMirrorClient:
 
         1. packing & pickling screen data
         2. send data to server
+
         """
         try:
             while True:
@@ -122,6 +127,7 @@ class ScreenMirrorClient:
 
         Returns:
             screen: np.ndarray
+
         """
         screen = np.array(ImageGrab.grab())
         if self._CURSOR:
@@ -141,6 +147,7 @@ class ScreenMirrorClient:
 
         Returns:
             encoded_data: np.ndarray
+
         """
         encode_param = (cv2.IMWRITE_JPEG_QUALITY, self._QUALITY)
         _, encoded_data = cv2.imencode(ext='.jpg',
