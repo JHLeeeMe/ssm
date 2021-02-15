@@ -8,6 +8,7 @@ Functions:
 
 Classes:
     ScreenMirrorServer
+
 """
 
 import os
@@ -26,6 +27,7 @@ def _screen_size() -> (int, int):
 
     Returns:
         width, height: (int, int)
+
     """
     display = Display(display=os.environ['DISPLAY'])
     width, height = \
@@ -53,6 +55,7 @@ class ScreenMirrorServer:
         start() -> None
 
         _receive(conn_socket: socket.socket, addr: (str, int)) -> None
+
     """
     def __init__(self, host: str = '', port: int = 7890):
         self._HOST = host
@@ -81,6 +84,7 @@ class ScreenMirrorServer:
                 connected client socket
             addr: (str, int)
                 connected client address
+
         """
         assert (conn_socket is not None)
 
