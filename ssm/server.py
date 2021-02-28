@@ -122,7 +122,14 @@ class ScreenMirrorServer:
                                         (self._WIDTH, self._HEIGHT),
                                         interpolation=cv2.INTER_AREA)
 
+                # Show screen with no menu bar
                 cv2.imshow(winname=str(addr), mat=screen)
+                cv2.namedWindow(winname=str(addr),
+                                flags=cv2.WND_PROP_FULLSCREEN)
+                cv2.setWindowProperty(winname=str(addr),
+                                      prop_id=cv2.WND_PROP_FULLSCREEN,
+                                      prop_value=cv2.WINDOW_FULLSCREEN)
+
                 if cv2.waitKey(1) == 27:
                     raise StopIteration
         except StopIteration:
