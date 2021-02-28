@@ -6,7 +6,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="ssm-python",
-    version="0.0.2",
+    version="0.0.3",
     author="JHLeeeMe",
     author_email="lejung92@gmail.com",
     description="Simple Screen Mirror",
