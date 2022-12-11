@@ -13,6 +13,7 @@ Classes:
 """
 
 import os
+import sys
 import struct
 import pickle
 import socket
@@ -21,6 +22,11 @@ import cv2
 import numpy as np
 from PIL import ImageGrab
 from Xlib.display import Display
+
+
+if sys.platform not in ['win32', 'linux']:
+    print(f"{sys.platform} is not supported.")
+    exit()
 
 
 def _screen_size() -> (int, int):
@@ -32,9 +38,19 @@ def _screen_size() -> (int, int):
         width, height: (int, int)
 
     """
-    display = Display(display=os.environ['DISPLAY'])
-    width, height = \
-        display.screen().width_in_pixels, display.screen().height_in_pixels
+    if sys.platform == 'win32':
+        import ctypes
+        try:
+           ctypes.windll.user32.SetProcessDPIAware()
+        except:
+            pass  # for Windows XP
+        width, height = \
+            ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1)
+    else:
+        from Xlib.display import Display
+        display = Display(display=os.environ['DISPLAY'])
+        width, height = \
+            display.screen().width_in_pixels, display.screen().height_in_pixels
     return width, height
 
 
@@ -47,9 +63,14 @@ def _mouse_position() -> (int, int):
         coordinates: (int, int)
 
     """
-    display = Display(display=os.environ['DISPLAY'])
-    coordinates = display.screen().root.query_pointer()._data
-    return coordinates['root_x'], coordinates['root_y']
+    if sys.platform == 'win32':
+        cursor = ctypes.wintypes.POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(cursor))
+        return cursor.x, cursor.y
+    else:
+        display = Display(display=os.environ['DISPLAY'])
+        coordinates = display.screen().root.query_pointer()._data
+        return coordinates['root_x'], coordinates['root_y']
 
 
 class ScreenMirrorClient:
@@ -154,3 +175,7 @@ class ScreenMirrorClient:
                                        img=data,
                                        params=encode_param)
         return encoded_data
+
+if __name__ == '__main__':
+    client = ScreenMirrorClient('localhost', quality=90, cursor=True)
+    client.start();
