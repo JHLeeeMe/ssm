@@ -3,4 +3,4 @@ opencv-python==4.5.1.48
 Pillow==8.1.0
 python-xlib==0.29
 six==1.15.0
-ssm-python==0.0.2
+ssm-python==0.1.0
