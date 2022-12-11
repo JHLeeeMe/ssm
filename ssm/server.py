@@ -4,7 +4,7 @@
 2. show client screen
 
 Functions:
-    _screen_size() -> (int, int)
+    _screen_size() -> Tuple[int, int]
 
 Classes:
     ScreenMirrorServer
@@ -12,15 +12,21 @@ Classes:
 """
 
 import os
+import sys
 import struct
 import pickle
 import socket
+from typing import Tuple
 
 import cv2
-from Xlib.display import Display
 
 
-def _screen_size() -> (int, int):
+if sys.platform not in ['win32', 'linux']:
+    print(f"{sys.platform} is not supported.")
+    exit()
+
+
+def _screen_size() -> Tuple[int, int]:
     """Get screen size
 
     extract screen size in pixels
@@ -29,9 +35,19 @@ def _screen_size() -> (int, int):
         width, height: (int, int)
 
     """
-    display = Display(display=os.environ['DISPLAY'])
-    width, height = \
-        display.screen().width_in_pixels, display.screen().height_in_pixels
+    if sys.platform == 'win32':
+        import ctypes
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except AttributeError:
+            pass  # for Windows XP
+        width, height = \
+            ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1)
+    else:
+        from Xlib.display import Display
+        display = Display(display=os.environ['DISPLAY'])
+        width, height = \
+            display.screen().width_in_pixels, display.screen().height_in_pixels
     return width, height
 
 
@@ -54,7 +70,7 @@ class ScreenMirrorServer:
     Methods:
         start() -> None
 
-        _receive(conn_socket: socket.socket, addr: (str, int)) -> None
+        _receive(conn_socket: socket.socket, addr: Tuple[str, int]) -> None
 
     """
     def __init__(self, host: str = '', port: int = 7890):
@@ -72,7 +88,7 @@ class ScreenMirrorServer:
 
         self._receive(conn_socket, addr)
 
-    def _receive(self, conn_socket: socket.socket, addr: (str, int)):
+    def _receive(self, conn_socket: socket.socket, addr: Tuple[str, int]):
         """Receive data from client
 
         1. receive data from client
@@ -82,7 +98,7 @@ class ScreenMirrorServer:
         Args:
             conn_socket: socket.socket
                 connected client socket
-            addr: (str, int)
+            addr: Tuple[str, int]
                 connected client address
 
         """
@@ -122,13 +138,7 @@ class ScreenMirrorServer:
                                         (self._WIDTH, self._HEIGHT),
                                         interpolation=cv2.INTER_AREA)
 
-                # Show screen with no menu bar
                 cv2.imshow(winname=str(addr), mat=screen)
-                cv2.namedWindow(winname=str(addr),
-                                flags=cv2.WND_PROP_FULLSCREEN)
-                cv2.setWindowProperty(winname=str(addr),
-                                      prop_id=cv2.WND_PROP_FULLSCREEN,
-                                      prop_value=cv2.WINDOW_FULLSCREEN)
 
                 if cv2.waitKey(1) == 27:
                     raise StopIteration
@@ -136,3 +146,4 @@ class ScreenMirrorServer:
             conn_socket.close()
             cv2.destroyWindow(winname=str(addr))
             print('Mirroring ends...')
+

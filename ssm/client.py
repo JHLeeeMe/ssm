@@ -4,8 +4,8 @@
 2. send screen data to server
 
 Functions:
-    _screen_size() -> (int, int)
-    _mouse_position() -> (int, int)
+    _screen_size() -> Tuple[int, int]
+    _mouse_position() -> Tuple[int, int]
 
 Classes:
     ScreenMirrorClient
@@ -13,9 +13,12 @@ Classes:
 """
 
 import os
+import sys
 import struct
 import pickle
 import socket
+import ctypes
+from typing import Tuple
 
 import cv2
 import numpy as np
@@ -23,33 +26,53 @@ from PIL import ImageGrab
 from Xlib.display import Display
 
 
-def _screen_size() -> (int, int):
+if sys.platform not in ['win32', 'linux']:
+    print(f"{sys.platform} is not supported.")
+    exit()
+
+
+def _screen_size() -> Tuple[int, int]:
     """Get screen size
 
     extract screen size in pixels
 
     Returns:
-        width, height: (int, int)
+        width, height: Tuple[int, int]
 
     """
-    display = Display(display=os.environ['DISPLAY'])
-    width, height = \
-        display.screen().width_in_pixels, display.screen().height_in_pixels
+    if sys.platform == 'win32':
+        import ctypes
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except AttributeError:
+            pass  # for Windows XP
+        width, height = \
+            ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1)
+    else:
+        from Xlib.display import Display
+        display = Display(display=os.environ['DISPLAY'])
+        width, height = \
+            display.screen().width_in_pixels, display.screen().height_in_pixels
     return width, height
 
 
-def _mouse_position() -> (int, int):
+def _mouse_position() -> Tuple[int, int]:
     """Get mouse position
 
     extract mouse (x, y) position
 
     Returns:
-        coordinates: (int, int)
+        coordinates: Tuple[int, int]
 
     """
-    display = Display(display=os.environ['DISPLAY'])
-    coordinates = display.screen().root.query_pointer()._data
-    return coordinates['root_x'], coordinates['root_y']
+    if sys.platform == 'win32':
+        cursor = ctypes.wintypes.POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(cursor))
+        return cursor.x, cursor.y
+    else:
+        display = Display(display=os.environ['DISPLAY'])
+        coordinates = display.screen().root.query_pointer()._data
+        return coordinates['root_x'], coordinates['root_y']
 
 
 class ScreenMirrorClient:
@@ -154,3 +177,4 @@ class ScreenMirrorClient:
                                        img=data,
                                        params=encode_param)
         return encoded_data
+
