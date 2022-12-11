@@ -17,6 +17,7 @@ import sys
 import struct
 import pickle
 import socket
+import ctypes
 from typing import Tuple
 
 import cv2
