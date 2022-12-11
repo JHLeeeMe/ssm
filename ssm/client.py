@@ -43,8 +43,8 @@ def _screen_size() -> Tuple[int, int]:
     if sys.platform == 'win32':
         import ctypes
         try:
-           ctypes.windll.user32.SetProcessDPIAware()
-        except:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except AttributeError:
             pass  # for Windows XP
         width, height = \
             ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1)
