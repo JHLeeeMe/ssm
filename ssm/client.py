@@ -4,8 +4,8 @@
 2. send screen data to server
 
 Functions:
-    _screen_size() -> (int, int)
-    _mouse_position() -> (int, int)
+    _screen_size() -> Tuple[int, int]
+    _mouse_position() -> Tuple[int, int]
 
 Classes:
     ScreenMirrorClient
@@ -17,6 +17,7 @@ import sys
 import struct
 import pickle
 import socket
+from typing import Tuple
 
 import cv2
 import numpy as np
@@ -29,13 +30,13 @@ if sys.platform not in ['win32', 'linux']:
     exit()
 
 
-def _screen_size() -> (int, int):
+def _screen_size() -> Tuple[int, int]:
     """Get screen size
 
     extract screen size in pixels
 
     Returns:
-        width, height: (int, int)
+        width, height: Tuple[int, int]
 
     """
     if sys.platform == 'win32':
@@ -54,13 +55,13 @@ def _screen_size() -> (int, int):
     return width, height
 
 
-def _mouse_position() -> (int, int):
+def _mouse_position() -> Tuple[int, int]:
     """Get mouse position
 
     extract mouse (x, y) position
 
     Returns:
-        coordinates: (int, int)
+        coordinates: Tuple[int, int]
 
     """
     if sys.platform == 'win32':
@@ -176,6 +177,3 @@ class ScreenMirrorClient:
                                        params=encode_param)
         return encoded_data
 
-if __name__ == '__main__':
-    client = ScreenMirrorClient('localhost', quality=90, cursor=True)
-    client.start();

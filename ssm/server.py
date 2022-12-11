@@ -4,7 +4,7 @@
 2. show client screen
 
 Functions:
-    _screen_size() -> (int, int)
+    _screen_size() -> Tuple[int, int]
 
 Classes:
     ScreenMirrorServer
@@ -16,6 +16,7 @@ import sys
 import struct
 import pickle
 import socket
+from typing import Tuple
 
 import cv2
 
@@ -25,7 +26,7 @@ if sys.platform not in ['win32', 'linux']:
     exit()
 
 
-def _screen_size() -> (int, int):
+def _screen_size() -> Tuple[int, int]:
     """Get screen size
 
     extract screen size in pixels
@@ -69,7 +70,7 @@ class ScreenMirrorServer:
     Methods:
         start() -> None
 
-        _receive(conn_socket: socket.socket, addr: (str, int)) -> None
+        _receive(conn_socket: socket.socket, addr: Tuple[str, int]) -> None
 
     """
     def __init__(self, host: str = '', port: int = 7890):
@@ -87,7 +88,7 @@ class ScreenMirrorServer:
 
         self._receive(conn_socket, addr)
 
-    def _receive(self, conn_socket: socket.socket, addr: (str, int)):
+    def _receive(self, conn_socket: socket.socket, addr: Tuple[str, int]):
         """Receive data from client
 
         1. receive data from client
@@ -97,7 +98,7 @@ class ScreenMirrorServer:
         Args:
             conn_socket: socket.socket
                 connected client socket
-            addr: (str, int)
+            addr: Tuple[str, int]
                 connected client address
 
         """
@@ -145,9 +146,4 @@ class ScreenMirrorServer:
             conn_socket.close()
             cv2.destroyWindow(winname=str(addr))
             print('Mirroring ends...')
-
-
-if __name__ == '__main__':
-    server = ScreenMirrorServer()
-    server.start();
 
