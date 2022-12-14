@@ -41,7 +41,6 @@ def _screen_size() -> Tuple[int, int]:
 
     """
     if sys.platform == 'win32':
-        import ctypes
         try:
             ctypes.windll.user32.SetProcessDPIAware()
         except AttributeError:
