@@ -16,6 +16,7 @@ import sys
 import struct
 import pickle
 import socket
+import ctypes
 from typing import Tuple
 
 import cv2
@@ -36,7 +37,6 @@ def _screen_size() -> Tuple[int, int]:
 
     """
     if sys.platform == 'win32':
-        import ctypes
         try:
             ctypes.windll.user32.SetProcessDPIAware()
         except AttributeError:
